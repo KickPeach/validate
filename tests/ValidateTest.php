@@ -26,11 +26,15 @@ class ValidateTest extends TestCase
         ];
 
         $rules = [
-//            'name'=>'required|max:2',
+//            'name'=>'required|lengthMax:2',
 //            'avatar'=>'required|url',
         ];
 
-        $data =  Validate::validated($data,$rules);
+        $errors = [
+              'name.require'=>'名字不能为空'
+        ];
+
+        $data =  Validate::validated($data,$rules,$errors);
 
 //        var_dump($data);
 //        die();
