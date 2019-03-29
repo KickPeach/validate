@@ -21,16 +21,16 @@ class ValidateTest extends TestCase
     {
 
         $data = [
-            'name'=>'111',
-            'avatar'=>''
+//            'name'=>'111',
+//            'avatar'=>'',
         ];
 
         $rules = [
-            'name'=>'required',
-            'avatar'=>'required|url'
+//            'name'=>'required|max:2',
+//            'avatar'=>'required|url',
         ];
 
-        $data =  Validate::validated($data,$rules,['name.required'=>"施斯颖最帅"]);
+        $data =  Validate::validated($data,$rules);
 
 //        var_dump($data);
 //        die();

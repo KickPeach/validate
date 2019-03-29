@@ -10,9 +10,17 @@ namespace KickPeach\Validate;
 
 use KickPeach\Validate\Error;
 
-class Rule
+abstract class Rule
 {
 
+    /**
+     * @param $str
+     * @param $column
+     * @param array $errmsgs
+     * @return string
+     * @author sevenshi
+     * @date 2019-03-29 10:27
+     */
     public static function required($str,$column,$errmsgs=[])
     {
         $str = trim($str);
@@ -28,6 +36,14 @@ class Rule
         return $str;
     }
 
+    /**
+     * @param $email
+     * @param $column
+     * @param array $errmsgs
+     * @return mixed
+     * @author sevenshi
+     * @date 2019-03-29 10:27
+     */
     public static function email($email,$column,$errmsgs=[])
     {
         $errmsg = '';
@@ -42,6 +58,14 @@ class Rule
         return $email;
     }
 
+    /**
+     * @param $url
+     * @param $column
+     * @param array $errmsgs
+     * @return mixed
+     * @author sevenshi
+     * @date 2019-03-29 10:27
+     */
     public static function url($url, $column,$errmsgs=[])
     {
         $errmsg = '';
@@ -56,6 +80,14 @@ class Rule
         return $url;
     }
 
+    /**
+     * @param $ip
+     * @param $column
+     * @param array $errmsgs
+     * @return mixed
+     * @author sevenshi
+     * @date 2019-03-29 10:27
+     */
     public static function ip($ip,$column,$errmsgs = [])
     {
         $errmsg = '';
@@ -117,10 +149,24 @@ class Rule
     }
 
 
-    public static function decimal($decimal,  $column, $errmsgs = [],$arg=2)
+    /**
+     * @param $decimal
+     * @param $column
+     * @param array $errmsgs
+     * @param int $arg
+     * @return mixed
+     * @author sevenshi
+     * @date 2019-03-29 10:16
+     * 验证值是否布尔值
+     */
+    public static function decimal($decimal,  $column, $errmsgs = [],$arg=0)
     {
         $errmsg = '';
         $isdecimal = false;
+
+        if (!is_numeric($arg)){
+            throw new ValidateException('decimal参数必须为整数');
+        }
 
         if (is_null($decimal)) {
             if (filter_var($decimal, FILTER_VALIDATE_FLOAT)){
@@ -128,12 +174,13 @@ class Rule
             }
         } elseif (intval($decimal) === 0) {
             // 容错处理 如果小数点后设置0位 则验整数
-            if (filter_var($data, FILTER_VALIDATE_INT)){
+            if (filter_var($decimal, FILTER_VALIDATE_INT)){
                 $isdecimal = true;
             }
         } else {
+            $arg = $arg ?:2;
             $regex = '/^(0|[1-9]+[0-9]*)(.[0-9]{1,' . $arg . '})?$/';
-            if (preg_match($regex, $data)!=0){
+            if (preg_match($regex, $decimal)!=0){
                 $isdecimal = true;
             }
         }
@@ -147,6 +194,127 @@ class Rule
         return $decimal;
     }
 
+
+    /**
+     * @param $float
+     * @param $column
+     * @param array $errmsgs
+     * @return mixed
+     * @author sevenshi
+     * @date 2019-03-29 11:03
+     */
+    public static function float($float,  $column, $errmsgs = [])
+    {
+        $errmsg = '';
+
+        if (filter_var($float, FILTER_VALIDATE_FLOAT)) {
+            if (!empty($errmsgs)) {
+                $errmsg = Error::run($errmsgs,$column,__FUNCTION__);
+            }
+            $errmsg = $errmsg ? $errmsg : $column.':错误的浮点数';
+            throw new ValidateException($errmsg);        }
+        return $float;
+
+    }
+
+    /**
+     * @param $float
+     * @param $column
+     * @param array $errmsgs
+     * @return mixed
+     * @author sevenshi
+     * @date 2019-03-29 11:04
+     */
+    public static function int($int,  $column, $errmsgs = [])
+    {
+        $errmsg = '';
+
+        if (filter_var($int, FILTER_VALIDATE_INT)) {
+            if (!empty($errmsgs)) {
+                $errmsg = Error::run($errmsgs,$column,__FUNCTION__);
+            }
+            $errmsg = $errmsg ? $errmsg : $column.':错误的整型格式';
+            throw new ValidateException($errmsg);        }
+        return $int;
+
+    }
+
+    /**
+     * @param $data
+     * @param $column
+     * @param array $errmsgs
+     * @param int $arg
+     * @return mixed
+     * @author sevenshi
+     * @date myformmat
+     */
+    public static function lengthMax($data,  $column, $errmsgs = [],$arg=8)
+    {
+        $nolt = false;
+
+        if (!is_numeric($arg)){
+            throw new ValidateException('max参数必须为整数');
+        }
+
+        if (is_numeric($data) || is_string($data)) {
+            if (strlen($data) <= $arg) {
+                $nolt = true;
+            }
+        } else if (is_array($data)) {
+            if (count($data) <= $arg) {
+                $nolt = true;
+            }
+        }
+
+        if (!$nolt) {
+            if (!empty($errmsgs)) {
+                $errmsg = Error::run($errmsgs,$column,__FUNCTION__);
+            }
+            $errmsg = $errmsg ? $errmsg : $column.':长度不能大于'.$arg.'个字符';
+            throw new ValidateException($errmsg);
+        }
+        return $data;
+
+    }
+
+
+    /**
+     * @param $data
+     * @param $column
+     * @param array $errmsgs
+     * @param int $arg
+     * @return mixed
+     * @author sevenshi
+     * @date 2019-03-29 11:17
+     */
+    public static function lengthMin($data,  $column, $errmsgs = [],$arg=8)
+    {
+        $nolt = false;
+
+        if (!is_numeric($arg)){
+            throw new ValidateException('max参数必须为整数');
+        }
+
+        if (is_numeric($data) || is_string($data)) {
+            if (strlen($data) >= $arg) {
+                $nolt = true;
+            }
+        } else if (is_array($data)) {
+            if (count($data) >= $arg) {
+                $nolt = true;
+            }
+        }
+
+        if (!$nolt) {
+            if (!empty($errmsgs)) {
+                $errmsg = Error::run($errmsgs,$column,__FUNCTION__);
+            }
+            $errmsg = $errmsg ? $errmsg : $column.':长度不能小于'.$arg.'个字符';
+            throw new ValidateException($errmsg);
+        }
+        return $data;
+
+    }
 
 
 }
