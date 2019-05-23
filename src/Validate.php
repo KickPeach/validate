@@ -52,7 +52,7 @@ class Validate
                                 throw new ValidateException('不存在该验证规则'.$rule_item);
                             }
 
-                        }else if (count($rule_argc_arr==1)){
+                        }else if (count($rule_argc_arr)==1){
 
                             if (in_array($rule_item,get_class_methods(Rule::class))){
                                 Rule::$rule_item($data[$key],$key,$errmsg);
